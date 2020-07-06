@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			    http://www.springframework.org/schema/beans/spring-beans.xsd
+			    http://www.springframework.org/schema/security
+			    http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<security:global-method-security pre-post-annotations="enabled"  proxy-target-class="true"> </security:global-method-security>
+    <!--释放静态资源-->
+    <security:http pattern="/login.html" security="none"/>
+    <security:http pattern="/fail.html" security="none"/>
+    <security:http pattern="/css/**" security="none"/>
+    <security:http pattern="/img/**" security="none"/>
+    <security:http pattern="/plugins/**" security="none"/>
+
+    <!--springsecurity的主配置-->
+    <security:http auto-config="true" use-expressions="true">
+        <!--指定基本角色-->
+        <security:intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>
+        <!--认证相关配置-->
+        <security:form-login login-page="/login.html"
+                             login-processing-url="/login"
+                             default-target-url="/index.jsp"
+                             authentication-failure-url="/fail.html"/>
+        <!--退出登录相关配置-->
+        <security:logout logout-url="/logout"
+                         logout-success-url="/login.html"
+                         invalidate-session="true"/>
+        <!--放开csrf拦截-->
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <!--加盐加密对象  如果名称为encoder可以不用加-->
+    <bean id="iencoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+
+    <!--认证信息-->
+    <security:authentication-manager>
+    <!-- userServiceIml是我们自定义的认证类-> -->
+        <security:authentication-provider user-service-ref="iuserservice">
+            <security:password-encoder ref="iencoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+ </beans>

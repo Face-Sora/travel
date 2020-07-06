@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mingqi.goTravel.dao.UserMapper">
+  <resultMap id="BaseResultMap" type="com.mingqi.goTravel.pojo.Users">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <collection property="roles" ofType="com.mingqi.goTravel.pojo.Role">
+   		<id column="r_id" jdbcType="INTEGER" property="id" />
+    	<result column="roleName" jdbcType="VARCHAR" property="rolename" />
+    	<result column="roleDesc" jdbcType="VARCHAR" property="roledesc" />
+    	<collection property="powers" ofType="com.mingqi.goTravel.pojo.Power">
+    		<id column="p_id" jdbcType="INTEGER" property="id" />
+	    	<result column="powerName" jdbcType="VARCHAR" property="powername" />
+	    	<result column="url" jdbcType="VARCHAR" property="url" />
+    	</collection>
+    </collection>
+  </resultMap>
+  <sql id="Base_Column_List">
+    user.*,role.id r_id, role.roleName, role.roleDesc, power.id p_id, power.powerName, power.url
+  </sql>
+  <select id="findByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select user.*,role.*
+    from user_role ur left join user on user.id = ur.userId left join role on role.id = ur.roleId 
+    where user.username = #{name,jdbcType=VARCHAR}
+  </select>
+   <select id="findById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" /> from user 
+    left join user_role ur on user.id = ur.userId
+    left join role on ur.roleId = role.id 
+    left join role_power rp on role.id = rp.roleId
+    left join power on rp.powerId = power.id
+    where user.id = #{id,jdbcType=INTEGER}
+  </select>
+   <select id="findAll" resultMap="BaseResultMap">
+    select user.*,role.*
+    from user left join user_role ur  on user.id = ur.userId left join role on role.id = ur.roleId 
+  </select>
+   <insert id="insert" parameterType="com.mingqi.goTravel.pojo.Users">
+   insert into user (id, username, password, 
+      email, phone, status
+      )
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, 
+      #{password,jdbcType=VARCHAR}, #{email,jdbcType=INTEGER}, 
+      #{phone,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}
+      )
+  </insert>
+   <insert id="bindRole" parameterType="java.lang.Integer">
+   insert into user_role values(#{param2,jdbcType=INTEGER},#{param1,jdbcType=INTEGER})
+  </insert>
+</mapper>
